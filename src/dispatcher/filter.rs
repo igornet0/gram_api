@@ -9,6 +9,7 @@ pub trait Filter: Send + Sync {
 
 /// Filter that always passes (for "any message" handlers).
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 pub struct Always;
 
 impl Filter for Always {

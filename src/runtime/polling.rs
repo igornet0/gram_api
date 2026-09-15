@@ -48,9 +48,7 @@ impl Polling {
 
         loop {
             let off = offset.load(Ordering::SeqCst);
-            let updates = api
-                .get_updates(off, self.timeout_secs, self.limit)
-                .await?;
+            let updates = api.get_updates(off, self.timeout_secs, self.limit).await?;
 
             for update in updates {
                 offset.store(update.update_id + 1, Ordering::SeqCst);

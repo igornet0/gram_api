@@ -1,10 +1,10 @@
 //! Unit tests for filters (command, text, regex).
 
-use tgram_api::core::{Chat, Message, Update, User};
-use tgram_api::dispatcher::{Context, Filter};
-use tgram_api::filters::{command, regex, text};
-use tgram_api::Bot;
 use std::sync::Arc;
+use gram_api::core::{Chat, Message, Update, User};
+use gram_api::dispatcher::{Context, Filter};
+use gram_api::filters::{command, regex, text};
+use gram_api::Bot;
 
 fn make_ctx(msg_text: Option<&str>) -> Context {
     let user = User {
@@ -74,10 +74,9 @@ fn test_regex() {
 
 #[test]
 fn test_filter_and() {
-    use tgram_api::filters::FilterExt;
+    use gram_api::filters::FilterExt;
     let f = command("start").and(text());
     assert!(f.check(&make_ctx(Some("/start"))));
-    assert!(!f.check(&make_ctx(Some("/start")))); // wait - /start has text, so it should pass
-    // Actually command("start") and text() both pass for "/start". So f.check should be true.
-    // Let me double-check: command("start") on "/start" -> true, text() on "/start" -> true. So and() -> true. Good.
+    assert!(!f.check(&make_ctx(Some("/help"))));
+    assert!(!f.check(&make_ctx(None)));
 }

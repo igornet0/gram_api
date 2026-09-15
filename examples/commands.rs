@@ -2,8 +2,8 @@
 //!
 //! Run with: cargo run --example commands -- <BOT_TOKEN>
 
-use tgram_api::prelude::*;
 use std::env;
+use gram_api::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -12,28 +12,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dispatcher = Dispatcher::new()
         .message(command("start"), |ctx: Context| async move {
             let chat_id = ctx.chat_id().unwrap();
-            ctx.bot.send_message(chat_id, "Hello! Send /help for commands.").await?;
+            ctx.bot
+                .send_message(chat_id, "Hello! Send /help for commands.")
+                .await?;
             Ok(())
         })
         .message(command("help"), |ctx: Context| async move {
             let chat_id = ctx.chat_id().unwrap();
-            ctx.bot.send_message(
-                chat_id,
-                "Commands:\n/start - Start\n/help - This message",
-            ).await?;
+            ctx.bot
+                .send_message(chat_id, "Commands:\n/start - Start\n/help - This message")
+                .await?;
             Ok(())
         })
         .message(text(), |ctx: Context| async move {
             let chat_id = ctx.chat_id().unwrap();
-            ctx.bot.send_message(chat_id, "Unknown command. Send /help.").await?;
+            ctx.bot
+                .send_message(chat_id, "Unknown command. Send /help.")
+                .await?;
             Ok(())
         });
 
-    Bot::new()
-        .token(&token)
-        .workers(4)
-        .run(dispatcher)
-        .await?;
+    Bot::new().token(&token).workers(4).run(dispatcher).await?;
 
     Ok(())
 }

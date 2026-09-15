@@ -1,16 +1,30 @@
 [package]
-name = "tgram_api"
-version = "0.1.0"
+name = "gram_api"
+version = "0.1.1"
 edition = "2021"
-description = "aiogram-like Telegram Bot API library for Rust"
-license = "MIT OR Apache-2.0"
+authors = ["igronet0"]
+description = "aiogram-like Telegram library for Rust: Bot API, optional User/TDLib accounts, gram CLI"
+license = "MIT"
+repository = "https://github.com/igornet0/gram_api"
+readme = "README.md"
+
+[workspace]
 
 [lib]
 path = "src/lib.rs"
 
 [[bin]]
-name = "tgram_api"
+name = "gram"
+path = "src/bin/gram.rs"
+required-features = ["cli"]
+
+[[bin]]
+name = "gram_api"
 path = "src/main.rs"
+
+[[example]]
+name = "account"
+required-features = ["accounts"]
 
 [dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
@@ -20,20 +34,28 @@ tokio = { version = "1", features = ["full"] }
 async-trait = "0.1"
 thiserror = "1.0"
 anyhow = "1.0"
+tglib = { path = "../tglib/crates/tglib", optional = true }
+regex = "1.10"
+axum = { version = "0.7", optional = true, features = ["json"] }
+redis = { version = "0.27", optional = true }
+clap = { version = "4", optional = true, features = ["derive", "env"] }
+toml = { version = "0.8", optional = true }
+dirs = { version = "5", optional = true }
+rpassword = { version = "7", optional = true }
+chrono = { version = "0.4", optional = true, features = ["serde"] }
+tower-http = { version = "0.5", optional = true, features = ["cors", "fs"] }
+uuid = { version = "1", optional = true, features = ["v4", "v7", "serde"] }
 
 [features]
-default = []
+default = ["cli"]
+# Control-plane CLI + local UI (no TDLib unless `accounts`)
+cli = ["dep:clap", "dep:toml", "dep:dirs", "dep:rpassword", "dep:chrono", "dep:uuid", "dep:axum", "dep:tower-http"]
+# Bot + user accounts (links tdjson). gram acc requires this.
+accounts = ["dep:tglib", "tglib/native", "cli"]
 webhook = ["dep:axum"]
 fsm-redis = ["dep:redis"]
 
-[dependencies.regex]
-version = "1.10"
-
-[dependencies.axum]
-version = "0.7"
-optional = true
-features = ["json"]
-
-[dependencies.redis]
-version = "0.27"
-optional = true
+[dev-dependencies]
+tokio = { version = "1", features = ["full", "test-util"] }
+clap = { version = "4", features = ["derive"] }
+tower = { version = "0.5", features = ["util"] }

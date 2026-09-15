@@ -37,9 +37,10 @@ impl Middleware for ThrottleMiddleware {
             _ => return Ok(()),
         };
         let now = Instant::now();
-        let mut guard = self.last_by_key.lock().map_err(|e| {
-            MiddlewareError::Other(anyhow::anyhow!("lock poisoned: {}", e))
-        })?;
+        let mut guard = self
+            .last_by_key
+            .lock()
+            .map_err(|e| MiddlewareError::Other(anyhow::anyhow!("lock poisoned: {}", e)))?;
         if let Some(&last) = guard.get(&key) {
             if now.duration_since(last) < self.min_interval {
                 return Err(MiddlewareError::Other(anyhow::anyhow!(

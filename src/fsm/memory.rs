@@ -1,6 +1,6 @@
 //! In-memory FSM storage.
 
-use super::storage::{FsmKey, State, Storage, FsmStorageError};
+use super::storage::{FsmKey, FsmStorageError, State, Storage};
 use async_trait::async_trait;
 use std::collections::HashMap;
 use std::sync::RwLock;

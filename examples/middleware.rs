@@ -2,8 +2,8 @@
 //!
 //! Run with: cargo run --example middleware -- <BOT_TOKEN>
 
-use tgram_api::prelude::*;
 use std::env;
+use gram_api::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,15 +15,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .message(text(), |ctx: Context| async move {
             let chat_id = ctx.chat_id().unwrap();
             let text = ctx.message_text().unwrap_or("");
-            ctx.bot.send_message(chat_id, &format!("Echo: {}", text)).await?;
+            ctx.bot
+                .send_message(chat_id, &format!("Echo: {}", text))
+                .await?;
             Ok(())
         });
 
-    Bot::new()
-        .token(&token)
-        .workers(4)
-        .run(dispatcher)
-        .await?;
+    Bot::new().token(&token).workers(4).run(dispatcher).await?;
 
     Ok(())
 }

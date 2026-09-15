@@ -3,8 +3,8 @@
 //! Run with: cargo run --example fsm -- <BOT_TOKEN>
 
 use serde_json::json;
-use tgram_api::prelude::*;
 use std::env;
+use gram_api::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,20 +28,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Some("waiting_name") => {
                     let name = ctx.message_text().unwrap_or("User").trim();
                     ctx.clear_state().await.ok();
-                    ctx.bot.send_message(chat_id, &format!("Hello, {}!", name)).await?;
+                    ctx.bot
+                        .send_message(chat_id, &format!("Hello, {}!", name))
+                        .await?;
                 }
                 _ => {
-                    ctx.bot.send_message(chat_id, "Send /start to begin.").await?;
+                    ctx.bot
+                        .send_message(chat_id, "Send /start to begin.")
+                        .await?;
                 }
             }
             Ok(())
         });
 
-    Bot::new()
-        .token(&token)
-        .workers(4)
-        .run(dispatcher)
-        .await?;
+    Bot::new().token(&token).workers(4).run(dispatcher).await?;
 
     Ok(())
 }

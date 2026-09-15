@@ -1,6 +1,6 @@
 //! Unit tests for model deserialization (serde).
 
-use tgram_api::core::Update;
+use gram_api::core::Update;
 
 #[test]
 fn test_update_deserialize_message() {

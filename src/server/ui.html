@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gram</title>
+  <style>
+    :root { color-scheme: light; --bg:#f4f6f8; --fg:#142033; --muted:#5b6b7c; --card:#fff; --line:#d8dee6; --acc:#0b6bcb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.45 system-ui,sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--line); background:var(--card); }
+    header h1 { margin:0; font-size:1.25rem; letter-spacing:.02em; }
+    header p { margin:.25rem 0 0; color:var(--muted); }
+    main { max-width:960px; margin:0 auto; padding:1.5rem; display:grid; gap:1rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1rem; }
+    .card h2 { margin:0 0 .75rem; font-size:1rem; }
+    .stat { font-size:1.75rem; font-weight:700; }
+    .muted { color:var(--muted); }
+    table { width:100%; border-collapse:collapse; }
+    th, td { text-align:left; padding:.5rem .35rem; border-bottom:1px solid var(--line); }
+    th { color:var(--muted); font-weight:600; font-size:.85rem; }
+    button, .btn { background:var(--acc); color:#fff; border:0; border-radius:8px; padding:.45rem .8rem; cursor:pointer; }
+    input { width:100%; padding:.5rem .65rem; border:1px solid var(--line); border-radius:8px; margin:.25rem 0 .5rem; }
+    form { display:grid; gap:.35rem; }
+    .row { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+    .err { color:#b42318; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Gram</h1>
+    <p>Local control plane for gram_api · <span id="feat"></span></p>
+  </header>
+  <main>
+    <section class="grid" id="dash"></section>
+    <section class="card">
+      <h2>Bots</h2>
+      <div id="bots" class="muted">Loading…</div>
+      <form id="add-bot" style="margin-top:1rem">
+        <strong>Add bot</strong>
+        <input name="name" placeholder="name" required />
+        <input name="token" placeholder="bot token" type="password" required autocomplete="off" />
+        <button type="submit">Add</button>
+      </form>
+    </section>
+    <section class="card" id="accounts-section" hidden>
+      <h2>Accounts</h2>
+      <div id="accounts" class="muted">Loading…</div>
+      <form id="login" style="margin-top:1rem">
+        <strong>Login account</strong>
+        <input name="phone" placeholder="+7985…" required />
+        <input name="code" placeholder="code (if asked)" autocomplete="off" />
+        <input name="password" placeholder="2FA password (if asked)" type="password" autocomplete="off" />
+        <button type="submit">Continue login</button>
+        <div id="login-msg" class="muted"></div>
+      </form>
+    </section>
+  </main>
+  <script>
+    async function api(path, opts) {
+      const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts || {}));
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      return data;
+    }
+    async function refresh() {
+      const st = await api('/api/status');
+      document.getElementById('feat').textContent = st.features.accounts ? 'bots + accounts' : 'bots only';
+      document.getElementById('dash').innerHTML = `
+        <div class="card"><div class="muted">Bots</div><div class="stat">${st.bots.total}</div><div class="muted">${st.bots.running} running</div></div>
+        <div class="card"><div class="muted">Accounts</div><div class="stat">${st.accounts.total}</div><div class="muted">${st.features.accounts ? 'TDLib enabled' : 'feature off'}</div></div>
+        <div class="card"><div class="muted">Data</div><div class="stat" style="font-size:1rem">${st.data_dir}</div></div>`;
+      const bots = await api('/api/bots');
+      const bl = document.getElementById('bots');
+      if (!bots.bots.length) bl.innerHTML = '<span class="muted">No bots yet</span>';
+      else bl.innerHTML = `<table><tr><th>Name</th><th>User</th><th>Running</th><th></th></tr>${
+        bots.bots.map(b => `<tr><td>${b.name}</td><td>${b.username||'—'}</td><td>${b.desired_running?'yes':'no'}</td>
+        <td class="row"><button onclick="botStart('${b.name}')">Start</button><button onclick="botStop('${b.name}')">Stop</button><button onclick="botRemove('${b.name}')">Remove</button></td></tr>`).join('')
+      }</table>`;
+      if (st.features.accounts) {
+        document.getElementById('accounts-section').hidden = false;
+        const acc = await api('/api/accounts');
+        const al = document.getElementById('accounts');
+        if (!acc.accounts.length) al.innerHTML = '<span class="muted">No accounts yet</span>';
+        else al.innerHTML = `<table><tr><th>Key</th><th>Phone</th><th>Name</th><th></th></tr>${
+          acc.accounts.map(a => `<tr><td>${a.key}</td><td>${a.phone}</td><td>${a.display_name||'—'}</td>
+          <td class="row"><button onclick="accStart('${a.key}')">Start</button><button onclick="accStop('${a.key}')">Stop</button><button onclick="accRemove('${a.key}')">Remove</button></td></tr>`).join('')
+        }</table>`;
+      }
+    }
+    async function botStart(n){ await api('/api/bots/'+n+'/start',{method:'POST',body:'{}'}); refresh(); }
+    async function botStop(n){ await api('/api/bots/'+n+'/stop',{method:'POST',body:'{}'}); refresh(); }
+    async function botRemove(n){ await api('/api/bots/'+n,{method:'DELETE'}); refresh(); }
+    async function accStart(n){ await api('/api/accounts/'+n+'/start',{method:'POST',body:'{}'}); refresh(); }
+    async function accStop(n){ await api('/api/accounts/'+n+'/stop',{method:'POST',body:'{}'}); refresh(); }
+    async function accRemove(n){ await api('/api/accounts/'+n,{method:'DELETE'}); refresh(); }
+    document.getElementById('add-bot').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      await api('/api/bots', { method:'POST', body: JSON.stringify({ name: fd.get('name'), token: fd.get('token') }) });
+      e.target.reset(); refresh();
+    };
+    document.getElementById('login').onsubmit = async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const body = { phone: fd.get('phone'), code: fd.get('code')||null, password: fd.get('password')||null };
+      if (!body.code) delete body.code; if (!body.password) delete body.password;
+      try {
+        const res = await api('/api/accounts/login', { method:'POST', body: JSON.stringify(body) });
+        document.getElementById('login-msg').textContent = res.phase + ': ' + res.message;
+        refresh();
+      } catch (err) {
+        document.getElementById('login-msg').innerHTML = '<span class="err">'+err.message+'</span>';
+      }
+    };
+    refresh().catch(e => alert(e.message));
+  </script>
+</body>
+</html>

@@ -40,10 +40,7 @@ impl Middleware for LoggingMiddleware {
         if kind.is_empty() {
             kind = "other".to_string();
         }
-        eprintln!(
-            "[tgram] update_id={} kind={}",
-            ctx.update.update_id, kind
-        );
+        eprintln!("[tgram] update_id={} kind={}", ctx.update.update_id, kind);
         Ok(())
     }
 }

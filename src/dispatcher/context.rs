@@ -14,7 +14,12 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(update: Update, bot: Arc<Bot>, storage: Option<Arc<dyn Storage>>, fsm_key: FsmKey) -> Self {
+    pub fn new(
+        update: Update,
+        bot: Arc<Bot>,
+        storage: Option<Arc<dyn Storage>>,
+        fsm_key: FsmKey,
+    ) -> Self {
         Self {
             update,
             bot,

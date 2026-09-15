@@ -1,7 +1,7 @@
 //! Handler trait for processing updates.
 
-use async_trait::async_trait;
 use crate::dispatcher::Context;
+use async_trait::async_trait;
 use thiserror::Error;
 
 /// Result type for handlers.

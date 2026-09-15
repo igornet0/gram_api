@@ -74,14 +74,15 @@ impl ApiClient {
         let bytes = res.bytes().await?;
         let api: ApiResponse<T> = serde_json::from_slice(&bytes)?;
         if api.ok {
-            api.result
-                .ok_or_else(|| TelegramError::Api {
-                    description: "ok=true but no result".to_string(),
-                    error_code: None,
-                })
+            api.result.ok_or_else(|| TelegramError::Api {
+                description: "ok=true but no result".to_string(),
+                error_code: None,
+            })
         } else {
             Err(TelegramError::Api {
-                description: api.description.unwrap_or_else(|| "Unknown error".to_string()),
+                description: api
+                    .description
+                    .unwrap_or_else(|| "Unknown error".to_string()),
                 error_code: api.error_code,
             })
         }
