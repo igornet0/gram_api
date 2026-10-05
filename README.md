@@ -1,11 +1,12 @@
 # tglib
 
-Standalone **Telegram User / TDLib** library for Rust.
+Telegram library for Rust: **User / TDLib** accounts and **Bot API**.
 
-Not a Bot API client. TDLib JSON `@type` names never leave `tglib-tdlib`.
+TDLib JSON `@type` names never leave `tglib-tdlib`.
 
 ```rust
 use tglib::{MockTelegramClient, TelegramAccountId, TelegramClient};
+use tglib::bot::BotClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -13,6 +14,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.start().await?;
     client.submit_phone("+10000000000".into()).await?;
     client.submit_code("12345".into()).await?;
+
+    let bot = BotClient::new("123456:ABC")?.with_api_base("https://api.telegram.org");
+    let _me = bot.get_me().await?;
     Ok(())
 }
 ```
@@ -25,6 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 | `tglib-core` | IDs, account status, events, permissions, errors |
 | `tglib-client` | `TelegramClient` trait, DTOs, mock, Markdown→HTML |
 | `tglib-tdlib` | TDLib adapter (stub by default; `native` links `tdjson`) |
+| `tglib-bot` | HTTP Bot API client (`getMe`, `sendMessage`, `sendPhoto`, `sendDocument`) |
 
 ## Features
 
@@ -38,7 +43,7 @@ cargo test -p tglib-tdlib --features native
 cargo test -p tglib --features native
 ```
 
-## Credentials
+## User credentials (TDLib)
 
 Register an app at https://my.telegram.org, then either:
 
@@ -60,7 +65,13 @@ Optional: `TGLIB_TELEGRAM_CONFIG=/path/to/telegram.toml`,
 
 Session files belong to the host app under a directory you pass into the adapter/factory (e.g. `{data}/accounts/<id>/`).
 
+## Bot credentials
+
+Pass a BotFather token into `BotClient::new(token)`. Optional `with_api_base` (default `https://api.telegram.org`). Tokens must never be logged.
+
 ## API surface
+
+User:
 
 - Auth: phone / code / password / `register_user` (`WaitRegistration`)
 - Chats: list / search / get / join public / leave
@@ -68,9 +79,13 @@ Session files belong to the host app under a directory you pass into the adapter
 - Media: `send_photo`, `send_document`, `download_file`
 - Updates: new / edited / deleted messages, chat title, auth, connection
 
+Bot:
+
+- `get_me`, `send_message` (parse modes via `prepare_telegram_text`), `send_photo`, `send_document`
+
 ## Out of scope
 
-- Telegram Bot API
+- Bot long-polling / webhook dispatcher / FSM
 - Multi-account SQLite stores, product REST/WS, UI
 
 ## Layout
@@ -83,5 +98,6 @@ tglib/
     ├── tglib/
     ├── tglib-core/
     ├── tglib-client/
-    └── tglib-tdlib/
+    ├── tglib-tdlib/
+    └── tglib-bot/
 ```

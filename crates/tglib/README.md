@@ -1,9 +1,10 @@
 # tglib (facade)
 
-Re-exports `tglib-core`, `tglib-client`, and `tglib-tdlib`.
+Re-exports `tglib-core`, `tglib-client`, `tglib-tdlib`, and `tglib-bot`.
 
 ```rust
 use tglib::{TelegramClient, TdlibAdapter, TelegramAccountId};
+use tglib::bot::BotClient;
 ```
 
 Enable live TDLib with feature `native` (= `tglib-tdlib/native`).

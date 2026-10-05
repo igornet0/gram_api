@@ -6,6 +6,7 @@ members = [
     "crates/tglib-core",
     "crates/tglib-client",
     "crates/tglib-tdlib",
+    "crates/tglib-bot",
 ]
 
 [workspace.package]
@@ -13,8 +14,8 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT"
 authors = ["igornet0"]
-repository = "https://github.com/igornet0/tglib"
-description = "Telegram User API library (TDLib) for Rust"
+repository = "https://github.com/igornet0/gram_api"
+description = "Telegram User (TDLib) + Bot API library for Rust"
 
 [workspace.dependencies]
 tokio = { version = "1.47", features = ["full"] }
@@ -28,11 +29,16 @@ toml = "0.8"
 dashmap = "6"
 parking_lot = "0.12"
 async-trait = "0.1"
+reqwest = { version = "0.12", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
 
 tglib = { path = "crates/tglib" }
 tglib-core = { path = "crates/tglib-core" }
 tglib-client = { path = "crates/tglib-client" }
 tglib-tdlib = { path = "crates/tglib-tdlib" }
+tglib-bot = { path = "crates/tglib-bot" }
 
 [profile.dev]
 opt-level = 0

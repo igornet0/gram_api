@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-description = "Telegram User/TDLib library: domain types, TelegramClient trait, TDLib adapter"
+description = "Telegram User/TDLib + Bot API facade: domain types, TelegramClient, TDLib adapter, BotClient"
 
 [features]
 default = []
@@ -14,3 +14,4 @@ native = ["tglib-tdlib/native"]
 tglib-core.workspace = true
 tglib-client.workspace = true
 tglib-tdlib.workspace = true
+tglib-bot.workspace = true
